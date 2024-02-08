@@ -1,0 +1,82 @@
+esphome:
+  name: esphome-web-4fc3e4
+  friendly_name: SMS FireBeetle ESP32
+
+  on_boot:
+    priority: -100
+    then:
+      - switch.turn_off: pcb_led
+      - wait_until:
+          condition:
+            api.connected:
+      - component.update: battery_voltage
+      - component.update: moisture_value
+      - script.execute: deep_sleep_evaluation
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "..." # YOUR KEY
+
+ota:
+
+captive_portal:
+
+deep_sleep:
+  id: deep_sleep_enabled
+  sleep_duration: 30min
+
+sensor:
+- platform: adc
+  id: battery_voltage
+  name: "Battery voltage"
+  pin: GPIO36
+  accuracy_decimals: 3
+  attenuation: 11dB
+  filters:
+    - multiply: 2
+
+- platform: adc
+  id: moisture_value
+  name: "Soil Moisture Voltage"
+  unit_of_measurement: "V"
+  pin: GPIO35
+  attenuation: 11dB
+  accuracy_decimals: 2
+
+# According Helper Button is required
+binary_sensor:
+  - platform: homeassistant
+    id: prevent_deep_sleep
+    entity_id: input_boolean.sms_esps_prevent_deep_sleep
+
+script:
+  - id: deep_sleep_evaluation
+    mode: queued
+    then:
+      - delay: 12s
+      - component.update: battery_voltage
+      - component.update: moisture_value
+      - if:
+          condition:
+            binary_sensor.is_on: prevent_deep_sleep
+          then:
+            - logger.log: 'Deep Sleep Disabled'
+            - component.update: battery_voltage
+            - component.update: moisture_value
+            - delay: 2s
+            - switch.turn_off: sens_pwr
+          else:
+            - component.update: battery_voltage
+            - component.update: moisture_value
+            - delay: 3s
+            - deep_sleep.enter: deep_sleep_enabled
+      - script.execute: deep_sleep_evaluation

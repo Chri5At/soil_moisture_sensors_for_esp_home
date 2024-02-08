@@ -1,0 +1,83 @@
+esphome:
+  name: esphome-web-fd8394
+  friendly_name: SMS AZD ESP32
+
+  on_boot:
+    priority: -100
+    then:
+      - wait_until:
+          condition:
+            api.connected:
+      - component.update: battery_voltage
+      - component.update: moisture_voltage
+      - script.execute: deep_sleep_evaluation
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "..." # YOUR KEY
+
+ota:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+captive_portal:
+
+deep_sleep:
+  id: deep_sleep_enabled
+  sleep_duration: 30min
+
+sensor:
+- platform: adc
+  id: battery_voltage
+  name: "Battery Voltage"
+  pin: GPIO34
+  accuracy_decimals: 2
+  attenuation: 11dB
+  filters:
+    - multiply: 1.82
+
+- platform: adc
+  id: moisture_voltage
+  name: "Soil Moisture Voltage"
+  pin: GPIO35
+  attenuation: auto
+  accuracy_decimals: 2
+
+# According Helper Button is required
+binary_sensor:
+  - platform: homeassistant
+    id: prevent_deep_sleep
+    entity_id: input_boolean.sms_esps_prevent_deep_sleep
+
+script:
+  - id: deep_sleep_evaluation
+    mode: queued
+    then:
+      - delay: 12s
+      - component.update: battery_voltage
+      - component.update: moisture_voltage
+      - if:
+          condition:
+            binary_sensor.is_on: prevent_deep_sleep
+          then:
+            - logger.log: 'Deep Sleep Disabled'
+            - component.update: battery_voltage
+            - component.update: moisture_voltage
+            - delay: 2s
+          else:
+            - component.update: battery_voltage
+            - component.update: moisture_voltage
+            - delay: 3s
+            - deep_sleep.enter: deep_sleep_enabled
+      - script.execute: deep_sleep_evaluation
