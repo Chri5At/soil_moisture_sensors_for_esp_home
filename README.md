@@ -1,6 +1,9 @@
 # Soil moisture sensors for Home Assistnat by using ESP Home
 Configuration files to integrate soil moisture sensors into Home Assistant by using ESP Home.
 
+> [!NOTE]
+> You can find more details about the setup in my video: [Youtube - Building a wireless soil moisture sensor #1](https://www.youtube.com/watch?v=qE35_fPxOck)
+
 The following setups are covered:
 
 ## Sparkfun ESP32 Thing with DF Robot Soil Moisture Sensor v.1
