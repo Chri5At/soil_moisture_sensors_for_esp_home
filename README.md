@@ -1,10 +1,14 @@
-# Soil moisture sensors for Home Assistnat by using ESP Home
+# Soil moisture sensors for Home Assistant by using ESP Home
 Configuration files to integrate soil moisture sensors into Home Assistant by using ESP Home.
 
 > [!NOTE]
-> You can find more details about the setup in my video: [Youtube - Building a wireless soil moisture sensor #1](https://www.youtube.com/watch?v=qE35_fPxOck)
+> You can find more details about the setups in my videos:<br />
+> [Youtube - Building a wireless soil moisture sensor #1](https://www.youtube.com/watch?v=qE35_fPxOck)<br />
+> [Youtube - Building a wireless soil moisture sensor #2](https://youtu.be/b9j9IffGZEs)<br />
+> [Youtube - Building a wireless soil moisture sensor #3](https://youtu.be/vsYwS1WDop8)
 
-The following setups are covered:
+# #1 Different Setups
+Setups with different microcontrollers and soil moisture sensors
 
 ## Sparkfun ESP32 Thing with DF Robot Soil Moisture Sensor v.1
 <img src="https://github.com/Chri5At/soil_moisture_sensors_for_esp_home/assets/123552852/37ddd91f-7350-46c8-9e30-2a1364078383" alt="Sparkfun ESP32 Thing" width="400" height="auto">
@@ -19,3 +23,7 @@ To read the battery voltage, the same voltage divider, as used in the setup abov
 
 ## DF Robot Firebeetle ESP8266 IoT with DF Robot Soil Moisture Sensor v.2 and INA3221 Board
 <img src="https://github.com/Chri5At/soil_moisture_sensors_for_esp_home/assets/123552852/f96620cf-234a-4010-8c70-60297826b371" alt="DFR ESP8266" width="400" height="auto">
+
+# #3 Power consumption optimization 
+To optimize power consumption, we can power the sensor by using a GPIO Pin. TO be able to measure the consumption, we use a second microcontroller with INA3221.
+![06](https://github.com/user-attachments/assets/bacb1cb2-767e-4d9e-a8b1-093ca2ddd6af)
