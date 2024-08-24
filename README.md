@@ -3,9 +3,9 @@ Configuration files to integrate soil moisture sensors into Home Assistant by us
 
 > [!NOTE]
 > You can find more details about the setups in my videos:<br />
-> [Youtube - Building a wireless soil moisture sensor #1](https://www.youtube.com/watch?v=qE35_fPxOck)<br />
-> [Youtube - Building a wireless soil moisture sensor #2](https://youtu.be/b9j9IffGZEs)<br />
-> [Youtube - Building a wireless soil moisture sensor #3](https://youtu.be/vsYwS1WDop8)
+> [Youtube - Building a wireless soil moisture sensor #1](https://www.youtube.com/watch?v=qE35_fPxOck) - different test setups<br />
+> [Youtube - Building a wireless soil moisture sensor #2](https://youtu.be/b9j9IffGZEs) - which soil moisture sensor is the best<br />
+> [Youtube - Building a wireless soil moisture sensor #3](https://youtu.be/vsYwS1WDop8) - how to optimize power consumption
 
 # #1 Different Setups
 Setups with different microcontrollers and soil moisture sensors
