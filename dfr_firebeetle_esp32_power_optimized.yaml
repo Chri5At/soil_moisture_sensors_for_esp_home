@@ -1,0 +1,101 @@
+# 12. August 2024
+# ESP Home v.2024.6.1
+# https://www.youtube.com/watch?v=vsYwS1WDop8
+
+esphome:
+  name: {your_name}
+  friendly_name: SMS FireBeetle ESP32
+
+  on_boot:
+    priority: -100
+    then:
+      - output.turn_on: gpio_sensor
+      - wait_until:
+          condition:
+            api.connected:
+      - component.update: battery_voltage
+      - component.update: moisture_value
+      - script.execute: deep_sleep_evaluation
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: {your_key}
+
+ota:
+  - platform: esphome
+
+wifi:
+  fast_connect: True
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+captive_portal:
+
+deep_sleep:
+  id: deep_sleep_enabled
+  sleep_duration: 6h
+
+# Connect to Helper-button to prevent deep sleep
+binary_sensor:
+  - platform: homeassistant
+    id: prevent_deep_sleep
+    entity_id: input_boolean.sms_esps_prevent_deep_sleep
+
+# GPIO Pin to power the soil moisture sensor
+output:
+  - platform: gpio
+    pin: GPIO26
+    id: gpio_sensor
+
+sensor:
+- platform: adc
+  id: battery_voltage
+  name: "Battery voltage"
+  pin: GPIO36
+  accuracy_decimals: 3
+  attenuation: 11dB
+  filters:
+    - multiply: 2
+
+- platform: adc
+  id: moisture_value
+  name: "Soil Moisture Voltage"
+  unit_of_measurement: "V"
+  pin: GPIO35
+  attenuation: 11dB
+  accuracy_decimals: 2
+
+script:
+  - id: deep_sleep_evaluation
+    mode: queued
+    then:
+      - delay: 2s
+      - output.turn_on: gpio_sensor
+      - delay: 10s
+      - component.update: battery_voltage
+      - component.update: moisture_value
+      - if:
+          condition:
+            binary_sensor.is_on: prevent_deep_sleep
+          then:
+            - logger.log: 'Deep Sleep Disabled'
+            - component.update: battery_voltage
+            - component.update: moisture_value
+            - delay: 2s
+          else:
+            - component.update: battery_voltage
+            - component.update: moisture_value
+            - delay: 2s
+            - output.turn_off: gpio_sensor
+            - delay: 1s
+            - deep_sleep.enter: deep_sleep_enabled
+      - script.execute: deep_sleep_evaluation
