@@ -3,9 +3,10 @@ Configuration files to integrate soil moisture sensors into Home Assistant by us
 
 > [!NOTE]
 > You can find more details about the setups in my videos:<br />
-> [Youtube - Building a wireless soil moisture sensor #1](https://www.youtube.com/watch?v=qE35_fPxOck) - different test setups<br />
-> [Youtube - Building a wireless soil moisture sensor #2](https://youtu.be/b9j9IffGZEs) - which soil moisture sensor is the best<br />
-> [Youtube - Building a wireless soil moisture sensor #3](https://youtu.be/vsYwS1WDop8) - how to optimize power consumption
+> [Youtube - WSMS#1 - Wireless Sensor to control garden irrigation with ESPHome and Home Assistant](https://youtu.be/qE35_fPxOck) - Different Setups<br />
+> [Youtube - WSMS#2 - Best Soil Moisture Sensor for Smart Home Project](https://youtu.be/b9j9IffGZEs) - Results of ESP boards and sensor comparison<br />
+> [Youtube - WSMS#3 - Optimize Power Consumption of ESPHome Wireless Sensors](https://youtu.be/vsYwS1WDop8) - Optimize power consumption<br />
+> [Youtube - WSMS#4 - Solar Power your Smart Home Sensors](https://youtu.be/zpCm9TAhiMg) - Solar Power the Setup
 
 # #1 Different Setups
 Setups with different microcontrollers and soil moisture sensors
@@ -24,12 +25,12 @@ To read the battery voltage, the same voltage divider, as used in the setup abov
 ## DF Robot Firebeetle ESP8266 IoT with DF Robot Soil Moisture Sensor v.2 and INA3221 Board
 <img src="https://github.com/Chri5At/soil_moisture_sensors_for_esp_home/assets/123552852/f96620cf-234a-4010-8c70-60297826b371" alt="DFR ESP8266" width="400" height="auto">
 
-# #3 Power consumption optimization 
+# #3 Optimize power consumption
 To optimize power consumption, we can power the sensor by using a GPIO Pin. TO be able to measure the consumption, we use a second microcontroller with INA3221.
 ![06](https://github.com/user-attachments/assets/bacb1cb2-767e-4d9e-a8b1-093ca2ddd6af)
 
 # #4 Solar Power the Setup
-To be able to run our sensor indefinitely while also changeing the update rate, we add a solar module to our setup.<br />
+To be able to run our sensor indefinitely while also increasing the update rate, we add a solar module to our setup.<br />
 ## Setup to Comparison of different charge controllers by measuring solar and battery power.
 ![Test Setup Kopie 0](https://github.com/user-attachments/assets/ea31abca-e7dd-42f2-9cfe-c459a4ba7851)<br />
 ## Single configurations
