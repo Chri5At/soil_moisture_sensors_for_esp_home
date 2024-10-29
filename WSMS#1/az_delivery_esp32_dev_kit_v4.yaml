@@ -1,11 +1,10 @@
 esphome:
-  name: "spark-fun-esp32"
-  friendly_name: SMS SparkFun ESP32 Thing
+  name: esphome-web-fd8394
+  friendly_name: SMS AZD ESP32
 
   on_boot:
     priority: -100
     then:
-      - switch.turn_off: pcb_led
       - wait_until:
           condition:
             api.connected:
@@ -28,9 +27,7 @@ api:
 
 ota:
 
-
 wifi:
-  fast_connect: True
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
@@ -44,8 +41,7 @@ sensor:
 - platform: adc
   id: battery_voltage
   name: "Battery Voltage"
-  unit_of_measurement: "V"
-  pin: GPIO36
+  pin: GPIO34
   accuracy_decimals: 2
   attenuation: 11dB
   filters:
@@ -54,16 +50,9 @@ sensor:
 - platform: adc
   id: moisture_voltage
   name: "Soil Moisture Voltage"
-  unit_of_measurement: "V"
-  pin: GPIO38
-  attenuation: 11dB
+  pin: GPIO35
+  attenuation: auto
   accuracy_decimals: 2
-
-switch:
-- platform: gpio
-  pin: 5
-  name: "PCB LED GPIO5"
-  id: pcb_led
 
 # According Helper Button is required
 binary_sensor:
