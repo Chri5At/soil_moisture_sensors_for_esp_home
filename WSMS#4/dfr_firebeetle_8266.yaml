@@ -1,0 +1,133 @@
+esphome:
+  name: esphome-web-f74d4e
+  friendly_name: DFR8266 - SMS4
+
+esp8266:
+  board: esp01_1m
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "..." # YOUR KEY
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Optional manual IP
+  manual_ip:
+    static_ip: "XX.XX.XX.XX" # YOUR STATIC IP
+    gateway: "XX.XX.XX.XX" # YOUR GATEWAY IP
+    subnet: "XX.XX.XX.XX" # YOUR SUBNET MASK
+
+  # use fast connect
+  fast_connect: True
+
+captive_portal:
+
+i2c:
+  - sda: GPIO04
+    scl: GPIO05
+    id: e1
+
+sensor:
+- platform: ina3221
+  address: 0x40 # setup with TP4056
+  i2c_id: e1
+  id: sms4_ina3221_tp4056
+  channel_2:
+    shunt_resistance: 1 ohm
+    current:
+      name: "TP4056 Solar - Current"
+      accuracy_decimals: 5
+    power:
+      name: "TP4056 Solar - Power"
+      accuracy_decimals: 5
+    bus_voltage:
+      name: "TP4056 Solar - Voltage"
+      accuracy_decimals: 5
+  channel_3:
+    shunt_resistance: 0.82 ohm
+    current:
+      name: "TP4056 uC - Current"
+      accuracy_decimals: 5
+    power:
+      name: "TP4056 uC - Power"
+      accuracy_decimals: 5
+    bus_voltage:
+      name: "TP4056 uC - Voltage"
+      accuracy_decimals: 3
+  update_interval: 10s
+
+- platform: ina3221
+  address: 0x42 # setup with DFR0264
+  i2c_id: e1
+  id: sms4_ina3221_dfr0264
+  channel_1:
+    shunt_resistance: 0.82 ohm
+    current:
+      name: "DFR0264 uC - Current"
+      accuracy_decimals: 5
+    power:
+      name: "DFR0264 uC - Power"
+      accuracy_decimals: 5
+    bus_voltage:
+      name: "DFR0264 uC - Voltage"
+      accuracy_decimals: 3
+  channel_2:
+    shunt_resistance: 1 ohm
+    current:
+      name: "DFR0264 Solar - Current"
+      accuracy_decimals: 5
+    power:
+      name: "DFR0264 Solar - Power"
+      accuracy_decimals: 5
+    bus_voltage:
+      name: "DFR0264 Solar - Voltage"
+      accuracy_decimals: 5
+  channel_3:
+    shunt_resistance: 0.1 ohm
+    current:
+      name: "SMS4 Box - Current"
+      accuracy_decimals: 5
+    power:
+      name: "SMS4 Box - Power"
+      accuracy_decimals: 3
+    bus_voltage:
+      name: "SMS4 Box - Voltage"
+      accuracy_decimals: 2
+  update_interval: 10s
+
+- platform: bme280_i2c
+  address: 0x76
+  i2c_id: e1
+  id: sms4_bme280
+  temperature:
+    name: "SMS4 BME280 Temperature"
+  pressure:
+    name: "SMS4 BME280 Pressure"
+  humidity:
+    name: "SMS4 BME280 Humidity"
+
+- platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+  name: "SMS4 WiFi Signal dB INA"
+  id: sms4_wifi_signal_db_ina
+  update_interval: 60s
+  entity_category: "diagnostic"
+
+- platform: copy # Reports the WiFi signal strength in %
+  source_id: sms4_wifi_signal_db_ina
+  name: "SMS4 WiFi Signal Percent INA"
+  filters:
+    - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+  unit_of_measurement: "Signal %"
+  entity_category: "diagnostic"
+  device_class: ""
+
+    
