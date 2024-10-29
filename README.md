@@ -27,3 +27,11 @@ To read the battery voltage, the same voltage divider, as used in the setup abov
 # #3 Power consumption optimization 
 To optimize power consumption, we can power the sensor by using a GPIO Pin. TO be able to measure the consumption, we use a second microcontroller with INA3221.
 ![06](https://github.com/user-attachments/assets/bacb1cb2-767e-4d9e-a8b1-093ca2ddd6af)
+
+# #4 Solar Power the Setup
+To be able to run our sensor indefinitely while also changeing the update rate, we add a solar module to our setup.<br />
+## Setup to Comparison of different charge controllers by measuring solar and battery power.
+![Test Setup Kopie 0](https://github.com/user-attachments/assets/ea31abca-e7dd-42f2-9cfe-c459a4ba7851)<br />
+## Single configurations
+![Single Setups](https://github.com/user-attachments/assets/6df533df-8666-4d49-b0cf-1712b2cd6d91)
+
