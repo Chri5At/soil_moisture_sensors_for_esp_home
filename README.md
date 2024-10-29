@@ -1,4 +1,4 @@
-# Soil moisture sensors for Home Assistant by using ESP Home
+# Wireless Soil moisture sensors for Home Assistant by using ESP Home
 Configuration files to integrate soil moisture sensors into Home Assistant by using ESP Home.
 
 > [!NOTE]
