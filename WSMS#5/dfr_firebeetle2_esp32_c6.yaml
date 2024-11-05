@@ -1,0 +1,180 @@
+esphome:
+  name: esp32-c6--531_on_2nd
+  friendly_name: ESP32-C6 - 5.3.1 - 2nd Device
+  
+  on_boot:
+    priority: -100
+    then:
+      - wait_until:
+          condition:
+            api.connected:
+      - component.update: esp_c6_2nd_battery_voltage
+      - component.update: esp_c6_2nd_battery_level
+      - component.update: esp_c6_2nd_moisture_value
+      - component.update: c6_2nd_wifi_signal_db
+      - script.execute: deep_sleep_evaluation
+
+esp32:
+  board: esp32-c6-devkitm-1
+  variant: esp32c6
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+#Can be dev, latest, recommended, or check https://github.com/espressif/esp-idf/releases
+    version: "5.3.1"
+#check platform_version @ https://github.com/platformio/platform-espressif32/releases/
+    platform_version: 6.9.0
+    sdkconfig_options:
+      CONFIG_ESPTOOLPY_FLASHSIZE_4MB: y
+
+#This is to make sure adc compiles or else it will throw an error
+external_components:
+  - source:
+      # https://github.com/lboue/esphome/blob/adc_oneshot/esphome/components/adc
+      type: git
+      url: https://github.com/lboue/esphome
+      ref: adc_oneshot
+    components: [ adc ]
+    refresh: 0s
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "..." # YOUR KEY
+
+ota:
+  - platform: esphome
+
+wifi:
+  fast_connect: True
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+deep_sleep:
+  id: deep_sleep_enabled
+  sleep_duration: 15min
+
+binary_sensor:
+  - platform: homeassistant
+    id: prevent_deep_sleep_sms
+    name: Deep Sleep Mode
+    entity_id: input_boolean.sms_esps_prevent_deep_sleep
+    publish_initial_state: true
+
+output:
+  - platform: gpio
+    pin: 15
+    id: gpio_sensor
+
+sensor:
+  - platform: adc
+    id: esp_c6_2nd_moisture_value
+    name: "Soil Moisture Voltage C6 2nd"
+    unit_of_measurement: "V"
+    pin: GPIO2
+    # attenuation: 12dB
+    accuracy_decimals: 2
+    update_interval: 2s
+
+  - platform: adc
+    pin: GPIO0
+    name: Battery voltage
+    id: esp_c6_2nd_battery_voltage
+    unit_of_measurement: 'V'
+    device_class: voltage
+    state_class: measurement
+    accuracy_decimals: 3
+    # IDF 5.2.1 does not support 11dB
+    # attenuation: 12db
+    # Read and average the results.
+    update_interval: 200ms
+    filters:
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 5
+          send_first_at: 5
+      - throttle: 10s
+      # VBAT goes through a 2:1 voltage divider.
+      - multiply: 2
+      # My board mildly overestimates the voltage
+      - multiply: 0.98
+    on_value:
+      - component.update: esp_c6_2nd_battery_level
+
+  - platform: template
+    name: Battery level
+    id: esp_c6_2nd_battery_level
+    unit_of_measurement: '%'
+    device_class: battery
+    state_class: measurement
+    icon: mdi:battery-high
+    lambda: "return id(esp_c6_2nd_battery_voltage).state;"
+    filters:
+      - calibrate_linear:
+          - 3.45 -> 0.0
+          - 3.69 -> 10.0
+          - 3.73 -> 20.0
+          - 3.80 -> 40.0
+          - 3.87 -> 60.0
+          - 4.02 -> 80.0
+          - 4.20 -> 100.0
+      - clamp:
+          min_value: 0
+          max_value: 100
+
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "C6 2nd WiFi Signal dB INA"
+    id: c6_2nd_wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: c6_2nd_wifi_signal_db
+    name: "C6 2nd WiFi Signal Percent INA"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
+# Enable Web Server for easy debugging (optional)
+web_server:
+  port: 80
+  
+script:
+  - id: deep_sleep_evaluation
+    mode: queued
+    then:
+      - delay: 5s
+      - output.turn_on: gpio_sensor
+      - delay: 10s
+      - component.update: esp_c6_2nd_battery_voltage
+      - component.update: esp_c6_2nd_battery_level
+      - component.update: esp_c6_2nd_moisture_value
+      - component.update: c6_2nd_wifi_signal_db
+      - if:
+          condition:
+            binary_sensor.is_on: prevent_deep_sleep_sms
+          then:
+            - logger.log: 'Deep Sleep Disabled'
+            - component.update: esp_c6_2nd_battery_voltage
+            - component.update: esp_c6_2nd_battery_level
+            - component.update: esp_c6_2nd_moisture_value
+            - component.update: c6_2nd_wifi_signal_db
+            - delay: 30s
+          else:
+            - component.update: esp_c6_2nd_battery_voltage
+            - component.update: esp_c6_2nd_battery_level
+            - component.update: esp_c6_2nd_moisture_value
+            - component.update: c6_2nd_wifi_signal_db
+            - output.turn_off: gpio_sensor
+            - delay: 3s
+            - deep_sleep.enter: deep_sleep_enabled
+      - script.execute: deep_sleep_evaluation
+
+# Enable captive portal for initial setup (optional)
+captive_portal:
+    
