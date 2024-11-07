@@ -12,13 +12,25 @@ esphome:
       - output.turn_on: gpio_sensor
       - delay: 10s
       - component.update: esp_c6_2nd_battery_voltage
+      - delay: 100ms
       - component.update: esp_c6_2nd_battery_level
+      - delay: 100ms
       - component.update: esp_c6_2nd_moisture_value
+      - delay: 100ms
       - component.update: c6_2nd_wifi_signal_db
+      - delay: 100ms
+      - if: 
+          condition:
+            - text_sensor.state: 
+                id: prevent_deep_sleep
+                state: "off"
+          then: 
+            - deep_sleep.enter: deep_sleep_enabled
+      
   on_shutdown: 
     then:
       - output.turn_off: gpio_sensor
-      - delay: 3s
+      - delay: 1s
 
 esp32:
   board: esp32-c6-devkitm-1
@@ -55,19 +67,15 @@ ota:
   - platform: esphome
 
 wifi:
-  fast_connect: True
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   
-  # Optional manual IP
-  #manual_ip:
-  #  static_ip: 172.16.0.166
-  #  gateway: 172.16.0.1
-  #  subnet: 255.255.0.0
-
 deep_sleep:
   id: deep_sleep_enabled
-  sleep_duration: 15min
+  run_duration: 
+    seconds: 20
+  sleep_duration: 
+    minutes: 15
 
 text_sensor:
   - platform: homeassistant
@@ -86,7 +94,6 @@ text_sensor:
             else: 
               - logger.log: "Deep sleep enabled"
               - deep_sleep.allow: deep_sleep_enabled
-              - deep_sleep.enter: deep_sleep_enabled
 
 output:
   - platform: gpio
@@ -137,14 +144,20 @@ sensor:
     icon: mdi:battery-high
     lambda: "return id(esp_c6_2nd_battery_voltage).state;"
     filters:
-      - calibrate_linear:
-          - 3.45 -> 0.0
-          - 3.69 -> 10.0
-          - 3.73 -> 20.0
-          - 3.80 -> 40.0
-          - 3.87 -> 60.0
-          - 4.02 -> 80.0
-          - 4.20 -> 100.0
+      - calibrate_polynomial:
+          degree: 2
+          datapoints: 
+            - 2.5 -> 0
+            - 3.0 -> 10
+            - 3.2 -> 20
+            - 3.4 -> 30
+            - 3.5 -> 40
+            - 3.6 -> 50
+            - 3.7 -> 60
+            - 3.8 -> 70
+            - 3.9 -> 80
+            - 4.0 -> 90
+            - 4.2 -> 100
       - clamp:
           min_value: 0
           max_value: 100
@@ -162,7 +175,7 @@ sensor:
       - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
     unit_of_measurement: "Signal %"
     entity_category: "diagnostic"
-    device_class: ""
+    device_class: signal_strength
 
 # Enable Web Server for easy debugging (optional)
 web_server:
@@ -170,4 +183,3 @@ web_server:
 
 # Enable captive portal for initial setup (optional)
 captive_portal:
-    
