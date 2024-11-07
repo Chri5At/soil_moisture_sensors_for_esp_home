@@ -32,7 +32,6 @@ To optimize power consumption, we can power the sensor by using a GPIO Pin. TO b
 # #4 Solar Power the Setup
 To be able to run our sensor indefinitely while also increasing the update rate, we add a solar module to our setup.<br />
 ## Setup to Comparison of different charge controllers by measuring solar and battery power.
-![Test Setup Kopie 0](https://github.com/user-attachments/assets/ea31abca-e7dd-42f2-9cfe-c459a4ba7851)<br />
+![2024_11_07 Test Setup - fix_1](https://github.com/user-attachments/assets/4f0eb3e7-31d7-4fe1-8930-4aae68cee329)<br />
 ## Single configurations
-![Single Setups](https://github.com/user-attachments/assets/6df533df-8666-4d49-b0cf-1712b2cd6d91)
-
+![2024_11_07 Setups - fix_1](https://github.com/user-attachments/assets/8b333f77-183f-4e1a-a721-4eeadce97df2)
