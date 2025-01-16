@@ -8,23 +8,30 @@ esphome:
       - wait_until: 
           condition:
             api.connected
-      - delay: 2s
-      - output.turn_on: gpio_sensor
-      - delay: 10s
-      - component.update: esp_c6_2nd_battery_voltage
-      - delay: 100ms
-      - component.update: esp_c6_2nd_battery_level
-      - delay: 100ms
-      - component.update: esp_c6_2nd_moisture_value
-      - delay: 100ms
-      - component.update: c6_2nd_wifi_signal_db
-      - delay: 100ms
-      - if: 
+          timeout: 20s  # timeout after 20 seconds -> to avoid running indefinitely if WiFi connection fails
+      - if:
           condition:
-            - text_sensor.state: 
-                id: prevent_deep_sleep
-                state: "off"
-          then: 
+            api.connected
+          then:
+            - delay: 2s
+            - output.turn_on: gpio_sensor
+            - delay: 10s
+            - component.update: esp_c6_2nd_battery_voltage
+            - delay: 100ms
+            - component.update: esp_c6_2nd_battery_level
+            - delay: 100ms
+            - component.update: esp_c6_2nd_moisture_value
+            - delay: 100ms
+            - component.update: c6_2nd_wifi_signal_db
+            - delay: 100ms
+            - if:
+                condition:
+                  - text_sensor.state:
+                      id: prevent_deep_sleep
+                      state: "off"
+                then:
+                  - deep_sleep.enter: deep_sleep_enabled
+          else:  # if api connection failed -> enter deep sleep
             - deep_sleep.enter: deep_sleep_enabled
       
   on_shutdown: 
@@ -37,15 +44,13 @@ esp32:
   variant: esp32c6
   flash_size: 4MB
   framework:
-    type: esp-idf
-#Can be dev, latest, recommended, or check https://github.com/espressif/esp-idf/releases
-    version: "5.3.1"
-#check platform_version @ https://github.com/platformio/platform-espressif32/releases/
+    type: esp-idf # can be dev, latest, recommended, or check https://github.com/espressif/esp-idf/releases
+    version: "5.3.1" # check platform_version @ https://github.com/platformio/platform-espressif32/releases/
     platform_version: 6.9.0
     sdkconfig_options:
       CONFIG_ESPTOOLPY_FLASHSIZE_4MB: y
 
-#This is to make sure adc compiles or else it will throw an error
+# this is to make sure adc compiles or else it will throw an error
 external_components:
   - source:
       # https://github.com/lboue/esphome/blob/adc_oneshot/esphome/components/adc
@@ -106,7 +111,7 @@ sensor:
     name: "Soil Moisture Voltage C6 2nd"
     unit_of_measurement: "V"
     pin: GPIO2
-    # attenuation: 12dB
+    # attenuation: 12dB # enabling raises exception
     accuracy_decimals: 2
     update_interval: 2s
 
@@ -119,7 +124,7 @@ sensor:
     state_class: measurement
     accuracy_decimals: 3
     # IDF 5.2.1 does not support 11dB
-    # attenuation: 12db
+    # attenuation: 12db # enabling raises exception
     # Read and average the results.
     update_interval: 200ms
     filters:
@@ -130,8 +135,6 @@ sensor:
       - throttle: 10s
       # VBAT goes through a 2:1 voltage divider.
       - multiply: 2
-      # My board mildly overestimates the voltage
-      - multiply: 0.98
     on_value:
       - component.update: esp_c6_2nd_battery_level
 
@@ -162,13 +165,13 @@ sensor:
           min_value: 0
           max_value: 100
 
-  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+  - platform: wifi_signal # reports the WiFi signal strength/RSSI in dB
     name: "C6 2nd WiFi Signal dB INA"
     id: c6_2nd_wifi_signal_db
     update_interval: 60s
     entity_category: "diagnostic"
 
-  - platform: copy # Reports the WiFi signal strength in %
+  - platform: copy # reports the WiFi signal strength in %
     source_id: c6_2nd_wifi_signal_db
     name: "C6 2nd WiFi Signal Percent INA"
     filters:
